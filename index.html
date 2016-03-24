@@ -1,0 +1,235 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="jquery-2.1.4.js"></script>
+<script type="text/javascript">
+
+   /*
+    GET 把参数加在提交表单的 action 所指的 URL 中，在 URL 可以看到，安全性不好，传送数据量小，不能大于 2KB 
+    POST 将表单的字段放在 HTTP HEADER 传到 action 所指的 URL 中，用户看不到，安全性略高，且大小不受限制。
+ 
+    JQuery 方法: $.get()，$.post()，$.ajax()，get 和 post 调用 ajax 函数, ajax 默认用 get。
+    HTML 方法: <form action="PHP_Test.php" method="post"> 或 <form action="PHP_Test.php" method="get">
+   */
+ 
+   var type = "01";
+   if(type == "01")
+   {
+      $.ajax(
+              {
+                url: "PHP_Test.php",
+                data: {
+                        a1:"World",
+                        a2:"PHP"
+                      },
+                success: function(data) {
+                      document.getElementById('BodyText').innerHTML = data + document.getElementById('BodyText').innerHTML;
+                },
+                dataType: "html"
+              }
+            );
+   }
+   else if(type == "02")
+   {
+      $.post(
+              "PHP_Test.php",
+              {
+                 p1:"World",
+                 p2:"PHP"
+              },
+              function(data, status){
+                 document.getElementById('BodyText').innerHTML = data + document.getElementById('BodyText').innerHTML;
+              }
+            );
+   }
+   else if(type == "03")
+   {
+      document.write("<form action=\"PHP_Test.php\" method=\"post\">");
+      document.write("Name: <input type=\"text\" name=\"name\"><br>");
+      document.write("E-mail: <input type=\"text\" name=\"email\"><br>");
+      document.write("<input type=\"submit\">");
+      document.write("</form>");
+   }
+   else if(type == "04")
+   {
+      document.write('<form action="PHP_Test.php" method="get">');
+      document.write('Name: <input type="text" name="name"><br>');
+      document.write('E-mail: <input type="text" name="email"><br>');
+      document.write('<input type="submit">');
+      document.write('</form>');
+   }
+   else if(type == "05")
+   {
+      document.write('<form action="PHP_Test.php" method="post" enctype="multipart/form-data">');
+      document.write('<label for="file">Filename:</label> ');
+      document.write('<input type="file" name="file" id="file"/><br/><br/>');
+      document.write('<input type="submit" name="submit" value="submit"/></form>');
+   }
+
+</script>
+
+<script type="text/javascript">
+
+   function GetXmlHttpObject()
+   {
+      var xmlHttp = null;
+      try{
+         // Firefox, Opera 8.0+, Safari
+         xmlHttp = new XMLHttpRequest();
+      }
+      catch (e) {
+         // Internet Explorer
+         try {
+             xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
+         }
+         catch (e) {
+             xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+         }
+      }
+      return xmlHttp;
+   }
+
+   function showHint(str)
+   {
+      var xmlHttp;
+      if (str.length == 0) {   
+         document.getElementById("HintTXT").innerHTML = "";
+         return;
+      }
+      xmlHttp = GetXmlHttpObject()
+      if (xmlHttp==null) {
+         alert ("Browser does not support HTTP Request");
+         return;
+      } 
+     
+      var url = "PHP_Ajax.php";
+      url = url + "?type=Hint";
+      url = url + "&q=" + str;
+      url = url + "&sid=" + Math.random();
+      xmlHttp.onreadystatechange = getHint; 
+      xmlHttp.open("GET", url, true);
+      xmlHttp.send(null);
+
+      function getHint() 
+      {
+         if (xmlHttp.readyState == 4 || xmlHttp.readyState == "complete") { 
+            document.getElementById("HintTXT").innerHTML = xmlHttp.responseText 
+         } 
+      }
+   } 
+
+   function showCD(str)
+   {
+      var xmlHttp = GetXmlHttpObject();
+      if (xmlHttp == null) {
+         alert ("Browser does not support HTTP Request")
+         return
+      } 
+      var url = "PHP_Ajax.php";
+      url = url + "?type=CD";
+      url = url + "&q=" + str;
+      url = url + "&sid=" + Math.random();
+      xmlHttp.onreadystatechange = getCD; 
+      xmlHttp.open("GET",url,true);
+      xmlHttp.send(null);
+      
+      function getCD(){
+         if (xmlHttp.readyState == 4 || xmlHttp.readyState == "complete") { 
+            document.getElementById("CDTXT").innerHTML = xmlHttp.responseText 
+         } 
+      }
+   }
+
+   function showUser(str)
+   {
+      $.ajax(
+             {
+               url: "PHP_Ajax.php",
+               data: {
+                       type : "user",
+                       xml  : "no",
+                       q    : str,
+                       sid  : Math.random()
+                     },
+               success: function(data){
+                     document.getElementById('UserTXT').innerHTML = data;
+               },
+               dataType: "html"
+             }
+            );
+   }
+
+   function showUserXML(str)
+   {
+      var xmlHttp = GetXmlHttpObject();
+      if (xmlHttp == null) {
+         alert ("Browser does not support HTTP Request")
+         return
+      } 
+      
+      var url = "PHP_Ajax.php"
+      url = url + "?type=user";
+      url = url + "&xml=yes";
+      url = url + "&q=" + str;
+      url = url + "&sid=" + Math.random();
+      xmlHttp.onreadystatechange = showUser;
+      xmlHttp.open("GET",url,true);
+      xmlHttp.send(null);
+ 
+      function showUser(){
+         if (xmlHttp.readyState == 4 || xmlHttp.readyState == "complete")
+         {
+            xmlDoc = xmlHttp.responseXML;
+            document.getElementById('UserXML').innerHTML = 
+                     "ID : " + xmlDoc.getElementsByTagName("ID")[0].childNodes[0].nodeValue + "<br>" +
+                     "CardID : " + xmlDoc.getElementsByTagName("CardID")[0].childNodes[0].nodeValue + "<br>" +
+                     "FirstName : " + xmlDoc.getElementsByTagName("FirstName")[0].childNodes[0].nodeValue + "<br>" +
+                     "LastName : " + xmlDoc.getElementsByTagName("LastName")[0].childNodes[0].nodeValue + "<br>" +
+                     "Age : " + xmlDoc.getElementsByTagName("Age")[0].childNodes[0].nodeValue + "<br>" +
+                     "Company : " + xmlDoc.getElementsByTagName("Company")[0].childNodes[0].nodeValue + "<br>" +
+                     "City : " + xmlDoc.getElementsByTagName("City")[0].childNodes[0].nodeValue + "<br>";
+         } 
+      }
+   }
+
+</script>
+
+<style type="text/css">
+</style>
+</head>
+
+
+<body id="BodyText">
+   First Name: <input type="text" id="FirstName" onkeyup="showHint(this.value)">
+   <p>HINT: <span id="HintTXT"></span></p><br>
+
+   Select a CD:
+   <select name="cds" onchange="showCD(this.value)">
+      <option value="Bob Dylan">Bob Dylan</option>
+      <option value="Bee Gees">Bee Gees</option>
+      <option value="Cat Stevens">Cat Stevens</option>
+   </select>
+   <div id="CDTXT"><br><br><br><br><br><br></div><br>
+
+   Select a CardID:
+   <select name="users" onchange="showUser(this.value)">
+      <option value=123>123</option>
+      <option value=456>456</option>
+      <option value=678>678</option>
+   </select>
+   <div id="UserTXT"><br><br><br><br></div><br>
+
+   Select a CardID:
+   <select name="users_xml" onchange="showUserXML(this.value)">
+      <option value=123>123</option>
+      <option value=456>456</option>
+      <option value=678>678</option>
+   </select>
+   <div id="UserXML"><br><br><br><br><br><br></div><br>
+
+   <br><br><br><br><br><br>
+</body>
+
+</html> 
+
+
